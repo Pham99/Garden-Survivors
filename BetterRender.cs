@@ -1,0 +1,34 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MG2
+{
+    public class BetterRender
+    {
+        private SpriteBatch spriteBatch;
+        private Camera camera;
+        public BetterRender(SpriteBatch spriteBatch, Camera camera)
+        {
+            this.spriteBatch = spriteBatch;
+            this.camera = camera;
+        }
+
+        public void Render(Texture2D texture, Vector2 position) 
+        {
+            spriteBatch.Draw(texture, position, Color.White);
+        }
+        public void RenderRelativeToCamera(Texture2D texture, float x, float y, int width, int height)
+        {
+            spriteBatch.Draw(texture, new Rectangle((int)x - (int)camera.X, (int)y - (int)camera.Y, width, height), Color.White);
+        }
+        public void RenderRelativeToCamera(Texture2D texture, float x, float y, int width, int height, Color colour)
+        {
+            spriteBatch.Draw(texture, new Rectangle((int)x - (int)camera.X, (int)y - (int)camera.Y, width, height), colour);
+        }
+    }
+}
