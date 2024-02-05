@@ -4,39 +4,25 @@ using System;
 
 namespace MG2
 {
-    internal class HealthBar
+    public class HealthBar
     {
-        private Character character;
-        private Vector2 position;
         private Texture2D texture;
-        private int maxStat;
-        private int stat;
         private Rectangle shape;
         private float statRatio;
 
-        public HealthBar(Texture2D texture, int maxStat, int stat, Character character)
+        public HealthBar(int width = 100, int height = 10)
         {
-            this.texture = texture;
-            this.maxStat = maxStat;
-            this.stat = stat;
-            this.character = character;
-            this.shape = new Rectangle((int)character.X, (int)character.Y + 500, 100, 10);
+            texture = Assets.Textures["rectangle"];
+            shape = new Rectangle(0, 0, width, height);
         }
-        public void Update(int hp, int maxhp)
+        public void Draw(BetterRender betterRender, int hp, int maxhp, float x, float y)
         {
-            position = new Vector2(character.X, character.Y + 100);
-            shape.X = (int)character.X;
-            shape.Y = (int)character.Y;
-
+            shape.X = (int)x;
+            shape.Y = (int)y + 100;
             statRatio = hp / (float)maxhp;
-
-            shape.Width = Convert.ToInt32(100 * statRatio);
-        }
-
-        public void Draw(BetterRender betterRender)
-        {
+            shape.Width = (int)(100 * statRatio);
             Color colour = new Color(Math.Max(0.0f, 2.0f - 2.0f * statRatio), Math.Min(1.0f, 2.0f * statRatio), 0F);
-            betterRender.RenderRelativeToCamera(texture, position.X, position.Y, shape.Width, shape.Height, colour);
+            betterRender.RenderRelativeToCamera(texture, shape.X, shape.Y, shape.Width, shape.Height, colour);
         }
     }
 }

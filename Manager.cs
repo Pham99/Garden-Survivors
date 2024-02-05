@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace MG2
 {
-    public class Manager<T> where T : GameObject, ICollidable
+    public class Manager<T> where T : GameObject
     {
         public List<T> list = new List<T>();
         public Manager() { }
-        public void Spawn(T item)
+        public void Add(T item)
         {
             list.Add(item);
         }

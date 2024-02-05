@@ -39,20 +39,20 @@ namespace MG2
                 }
             }
         }
-        public Player(Texture2D texture, Texture2D texture2)
+        public Player(Texture2D texture)
         {
             this.texture = texture;
             X = 0;
             Y = 0;
             speed = 300F;
-            maxHp = 10;
+            maxHp = 1000;
             hp = maxHp;
             attack = 5;
             diagSpeed = speed * speedModifier;
             hp = maxHp;
             hitbox = new Rectangle((int)X, (int)Y, 100, 100);
             projectileManager = new Manager<Projectile>();
-            healthBar = new HealthBar(texture2, maxHp, hp, this);
+            healthBar = new HealthBar();
         }
         public void GetCamera(Camera camera)
         {
@@ -85,31 +85,30 @@ namespace MG2
             }
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && mouseOld.LeftButton == ButtonState.Released)
+            if (mouse.LeftButton == ButtonState.Pressed && mouseOld.LeftButton == ButtonState.Released || mouse.RightButton == ButtonState.Pressed)
             {
                 direction = new Vector2(mouse.X + camera.X - X, mouse.Y + camera.Y - Y);
                 direction.Normalize();
-                projectileManager.Spawn(new Projectile(X, Y, texture, direction));
+                projectileManager.Add(new Projectile(X + 50, Y + 50, texture, direction));
             }
             projectileManager.Update(deltaTime);
-            healthBar.Update(hp, maxHp);
 
         }
         public override void Draw(BetterRender betterRenderer)
         {
             betterRenderer.RenderRelativeToCamera(texture, X, Y, hitbox.Width, hitbox.Height);
             projectileManager.Draw(betterRenderer);
-            healthBar.Draw(betterRenderer);
+            healthBar.Draw(betterRenderer, hp, maxHp, X, Y);
         }
         public Rectangle GetHitbox()
         {
             return hitbox;
         }
-        public void OnCollision()
+        public void OnCollision(ICollidable obj)
         {
             hp -= 1;
         }
-        public bool ToBeRemoved()
+        public override bool ToBeRemoved()
         {
             throw new NotImplementedException();
         }

@@ -6,16 +6,21 @@ namespace MG2
 {
     public class Projectile : GameObject, ICollidable
     {
-        private float speed = 1000F;
         private Texture2D texture;
         private Vector2 direction;
-        public bool remove = false;
+        private int attack = 1;
+        private float speed = 1000F;
+        private int sizeX = 10;
+        private int sizeY = 10;
+        private Color color = Color.Yellow;
+        private float timeToLive = 5;
+        private bool remove = false;
 
         public Projectile(float x, float y, Texture2D texture, Vector2 direction)
         {
             X = x;
             Y = y;
-            this.hitbox = new Rectangle((int)X, (int)Y, 10, 10);
+            hitbox = new Rectangle((int)X, (int)Y, sizeX, sizeY);
             this.texture = texture;
             this.direction = direction;
         }
@@ -26,24 +31,26 @@ namespace MG2
             Y += direction.Y * speed * deltaTime;
             hitbox.X = (int)X;
             hitbox.Y = (int)Y;
-            if(Math.Abs(X) > 1920 || Math.Abs(Y) > 1200)
+            timeToLive -= deltaTime;
+            if(timeToLive < 0)
             {
                 remove = true;
             }
         }
+        public int Attack {  get { return attack; } }
         public override void Draw(BetterRender betterRender)
         {
-            betterRender.RenderRelativeToCamera(texture, X, Y, 10, 10, Color.Yellow);
+            betterRender.RenderRelativeToCamera(texture, X, Y, sizeX, sizeY, color);
         }
         public Rectangle GetHitbox()
         {
-            return this.hitbox;
+            return hitbox;
         }
-        public void OnCollision()
+        public void OnCollision(ICollidable obj)
         {
             remove = true;
         }
-        public bool ToBeRemoved()
+        public override bool ToBeRemoved()
         {
             return remove;
         }

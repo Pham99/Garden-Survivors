@@ -10,7 +10,6 @@ namespace MG2
     public interface ICollidable
     {
         public Rectangle GetHitbox();
-        public void OnCollision();
-        public bool ToBeRemoved();
+        public void OnCollision(ICollidable obj);
     }
 }

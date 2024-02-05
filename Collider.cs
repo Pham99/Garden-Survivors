@@ -15,10 +15,10 @@ namespace MG2
             {
                 foreach( var item2 in collidable2.list)
                 {
-                    if (item1.GetHitbox().Intersects(item2.GetHitbox()))
+                    if (item1.GetHitbox().Intersects(item2.GetHitbox()) && item1 != item2)
                     {
-                        item1.OnCollision();
-                        item2.OnCollision();
+                        item1.OnCollision(item2);
+                        item2.OnCollision(item1);
                     }
                 }
             }
@@ -29,8 +29,8 @@ namespace MG2
             {
                 if (item1.GetHitbox().Intersects(player.GetHitbox()))
                 {
-                    item1.OnCollision();
-                    player.OnCollision();
+                    item1.OnCollision(player);
+                    player.OnCollision(item1);
                 }
             }
         }

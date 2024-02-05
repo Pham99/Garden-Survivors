@@ -11,40 +11,61 @@ namespace MG2
     {
         private int x;
         private int y;
-        private int cooldown = 0;
+        private int cooldownTimer = 0;
+        private int cooldown;
         private Random random = new Random();
         private Manager<Enemy> enemyManager;
-        private Player player;
-        private Texture2D texture;
-        private Texture2D texture2;
+        private EnemyFactory enemyFactory;
         private Camera camera;
-        public Spawner(Manager<Enemy> enemyManager, Player player, Texture2D texture, Texture2D texture2, Camera camera)
+        private string enemyName;
+        public Spawner(Manager<Enemy> enemyManager, Camera camera, EnemyFactory enemyFactory, int cooldown, string enemyName)
         {
             this.enemyManager = enemyManager;
-            this.player = player;
-            this.texture = texture;
-            this.texture2 = texture2;
             this.camera = camera;
+            this.enemyFactory = enemyFactory;
+            this.cooldown = cooldown;
+            this.enemyName = enemyName;
         }
 
         public void Spawn()
         {
-            if (cooldown == 0)
+            if (cooldownTimer == 0)
             {
                 int xOffset = (int)camera.X;
                 int yOffset = (int)camera.Y;
-                x = random.Next(0 + xOffset, 1920 + xOffset);
+                x = random.Next(-500 + xOffset, 1920 + xOffset);
                 y = random.Next(-200 + yOffset, 0 + yOffset);
+                int choice = (random.Next(0, 4));
+                switch (choice)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        y += 1400;
+                        break;
+                    case 2:
+                        int temp = x;
+                        x = y;
+                        y = temp;
+                        break;
+                    case 3:
+                        int temp2 = x;
+                        x = y;
+                        y = temp2;
+                        x += 2400;
+                        break;
+
+                }
                 if (random.Next(0,2) == 0)
                 {
                     y += 1400;
                 }
-                enemyManager.Spawn(new Enemy(player, texture, texture2, x, y));
-                cooldown = 120;
+                enemyManager.Add(enemyFactory.GetEnemy(enemyName, x, y));
+                cooldownTimer = cooldown;
             }
             else
             {
-                cooldown--;
+                cooldownTimer--;
             }
         }
     }

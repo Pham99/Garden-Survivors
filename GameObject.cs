@@ -11,10 +11,11 @@ namespace MG2
     public abstract class GameObject
     {
         public Rectangle hitbox;
-        public float X { get; protected set; }
-        public float Y { get; protected set; }
+        public float X { get; set; }
+        public float Y { get; set; }
 
         public abstract void Update(float deltaTime);
         public abstract void Draw(BetterRender betterRender);
+        public abstract bool ToBeRemoved();
     }
 }

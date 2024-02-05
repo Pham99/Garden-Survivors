@@ -1,64 +1,44 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MG2
 {
-    public class Enemy : Character, ICollidable
+    public class Enemy : GameObject, ICollidable
     {
-        private Texture2D texture;
-        private Player target;
-        private bool remove = false;
-        private HealthBar healthBar;
-        public Enemy(Player target, Texture2D texture, Texture2D texture2, int x, int y)
+        private EnemyFlyWeight flyWeight;
+        public int hp;
+        public bool remove = false;
+        public Enemy(EnemyFlyWeight flyWeight, int x, int y)
         {
-            this.maxHp = 5;
-            this.hp = maxHp;
-            this.texture = texture;
-            this.target = target;
             X = x;
             Y = y;
-            speed = 150F;
-            hitbox = new Rectangle((int)X, (int)Y, 100, 100);
-            healthBar = new HealthBar(texture2, maxHp, hp, this);
+            this.flyWeight = flyWeight;
+            hp = flyWeight.maxHp;
+            hitbox.Width = flyWeight.sizeX;
+            hitbox.Height = flyWeight.sizeY;
         }
+
         public override void Update(float deltaTime)
         {
-            direction = new Vector2(X - target.X, Y - target.Y);
-            direction.Normalize();
-
-            X += speed * -direction.X * deltaTime;
-            Y += speed * -direction.Y * deltaTime;
-            hitbox.X = Convert.ToInt32(X);
-            hitbox.Y = Convert.ToInt32(Y);
-
-            healthBar.Update(hp, maxHp);
-
-            if (hp <= 0)
-            {
-                remove = true;
-            }
+            flyWeight.Update(deltaTime, this);
         }
-        public bool ToBeRemoved()
+        public override void Draw(BetterRender betterRender)
+        {
+            flyWeight.Draw(betterRender, this);
+        }
+        public void OnCollision(ICollidable obj)
+        {
+            flyWeight.OnCollision(obj, this);
+        }
+        public override bool ToBeRemoved()
         {
             return remove;
         }
-        public void OnCollision()
-        {
-            hp -= 1;
-        }
-
-        public override void Draw(BetterRender betterRender)
-        {
-            betterRender.RenderRelativeToCamera(texture, X, Y, hitbox.Width, hitbox.Height);
-            healthBar.Draw(betterRender);
-        }
-
         public Rectangle GetHitbox()
         {
             return hitbox;

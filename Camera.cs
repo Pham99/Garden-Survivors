@@ -22,13 +22,16 @@ namespace MG2
         {
             throw new NotImplementedException();
         }
-
         public void Update(int width, int height)
         {
             X = target.X - (width / 2) + (target.hitbox.Width / 2);
             Y = target.Y - (height / 2) + (target.hitbox.Height / 2);
         }
         public override void Update(float deltaTime)
+        {
+            throw new NotImplementedException();
+        }
+        public override bool ToBeRemoved()
         {
             throw new NotImplementedException();
         }
