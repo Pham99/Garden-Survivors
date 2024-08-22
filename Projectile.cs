@@ -15,13 +15,14 @@ namespace MG2
         private Color color = Color.Yellow;
         private float timeToLive = 5;
         private bool remove = false;
+        public int Attack {  get { return attack; } }
 
-        public Projectile(float x, float y, Texture2D texture, Vector2 direction)
+        public Projectile(float x, float y, Vector2 direction)
         {
-            X = x;
-            Y = y;
+            X = x - sizeX/2;
+            Y = y - sizeY/2;
             hitbox = new Rectangle((int)X, (int)Y, sizeX, sizeY);
-            this.texture = texture;
+            this.texture = Assets.Textures["Bullet"];
             this.direction = direction;
         }
 
@@ -37,10 +38,10 @@ namespace MG2
                 remove = true;
             }
         }
-        public int Attack {  get { return attack; } }
         public override void Draw(BetterRender betterRender)
         {
-            betterRender.RenderRelativeToCamera(texture, X, Y, sizeX, sizeY, color);
+            //betterRender.RenderRelativeToCamera(texture, X, Y, hitbox.Width, hitbox.Height, color);
+            betterRender.RenderWithRotationRelativeToCamera(texture, X + 5, Y + 5, null, (float)Math.Atan2(direction.Y, direction.X), new Vector2(8, 8), Vector2.One);
         }
         public Rectangle GetHitbox()
         {

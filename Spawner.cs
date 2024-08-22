@@ -13,18 +13,19 @@ namespace MG2
         private int y;
         private int cooldownTimer = 0;
         private int cooldown;
+        private int thickness = 300;
+        private int padding = 100;
         private Random random = new Random();
-        private Manager<Enemy> enemyManager;
         private EnemyFactory enemyFactory;
         private Camera camera;
         private string enemyName;
-        public Spawner(Manager<Enemy> enemyManager, Camera camera, EnemyFactory enemyFactory, int cooldown, string enemyName)
+        public Spawner(Camera camera, EnemyFactory enemyFactory, int cooldown, string enemyName, GameMananger gameMananger)
         {
-            this.enemyManager = enemyManager;
             this.camera = camera;
             this.enemyFactory = enemyFactory;
             this.cooldown = cooldown;
             this.enemyName = enemyName;
+            gameMananger.LevelUp += OnLevelUp;
         }
 
         public void Spawn()
@@ -33,40 +34,38 @@ namespace MG2
             {
                 int xOffset = (int)camera.X;
                 int yOffset = (int)camera.Y;
-                x = random.Next(-500 + xOffset, 1920 + xOffset);
-                y = random.Next(-200 + yOffset, 0 + yOffset);
-                int choice = (random.Next(0, 4));
-                switch (choice)
+                if (random.Next(2) == 0)
                 {
-                    case 0:
-                        break;
-                    case 1:
-                        y += 1400;
-                        break;
-                    case 2:
-                        int temp = x;
-                        x = y;
-                        y = temp;
-                        break;
-                    case 3:
-                        int temp2 = x;
-                        x = y;
-                        y = temp2;
-                        x += 2400;
-                        break;
+                    //vertical spawn area
+                    x = random.Next(xOffset - thickness - padding, xOffset - padding);
+                    y = random.Next(yOffset - thickness, yOffset + camera.height + thickness);
+                    if (random.Next(2) == 0)
+                    {
+                        x += thickness + camera.width + padding;
+                    }
+                }
+                else
+                {
+                    //horizontal spawn area
+                    x = random.Next(xOffset, xOffset + camera.width);
+                    y = random.Next(yOffset - thickness - padding, yOffset - padding);
+                    if (random.Next(2) == 0)
+                    {
+                        y += thickness + camera.height + padding;
+                    }
+                }
 
-                }
-                if (random.Next(0,2) == 0)
-                {
-                    y += 1400;
-                }
-                enemyManager.Add(enemyFactory.GetEnemy(enemyName, x, y));
+                enemyFactory.Create(enemyName, x, y);
                 cooldownTimer = cooldown;
             }
             else
             {
                 cooldownTimer--;
             }
+        }
+        public void OnLevelUp(int level)
+        {
+            cooldown = cooldown - (int)Math.Log2(level * 10);
         }
     }
 }

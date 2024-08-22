@@ -32,5 +32,12 @@ namespace MG2
                 obj.Draw(betterRender);
             }
         }
+        public void DrawHitbox(BetterRender betterRender)
+        {
+            foreach (var obj in list)
+            {
+                obj.DrawHitbox(betterRender);
+            }
+        }
     }
 }

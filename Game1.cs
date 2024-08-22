@@ -9,15 +9,14 @@ namespace MG2
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private BetterRender betterRenderer;
-        private Manager<Enemy> enemyManager;
-        private EnemyFactory enemyFactory;
-        private Spawner spawner;
-        private Spawner spawner2;
-        private Spawner spawner3;
+
         private Camera camera;
         private Player player;
-        private RepeatingBackground _background;
-        private bool pause = false;
+        private ResolutionPublisher resolutionPublisher;
+        private Level level;
+
+        private bool paused = false;
+        private bool debugModeOn = false;
 
         int frameCount = 0;
         float frameTime = 0.0f;
@@ -45,27 +44,30 @@ namespace MG2
         {
             base.Initialize();
 
-            player = new Player(Assets.Textures["vicksyLevel"]);
-            enemyManager = new Manager<Enemy>();
-            enemyFactory = new EnemyFactory(player);
-            camera = new Camera(player);
+            resolutionPublisher = new ResolutionPublisher();
+            player = new Player();
+            camera = new Camera(player, resolutionPublisher, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height);
             player.GetCamera(camera);
-            spawner = new Spawner(enemyManager, camera, enemyFactory, 4, "vicksyInsane");
-            spawner2 = new Spawner(enemyManager, camera, enemyFactory, 8, "vicksyGa");
-            spawner3 = new Spawner(enemyManager, camera, enemyFactory, 12, "vickSUS");
+
+            level = new Level(player, camera, resolutionPublisher);
+
             betterRenderer = new BetterRender(_spriteBatch, camera);
-            _background = new RepeatingBackground(Assets.Textures["grassBG"], player);
         }
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            Assets.Textures.Add("vicksyLevel", Content.Load<Texture2D>(@"sprites/vicksyLevel"));
-            Assets.Textures.Add("vicksyInsane", Content.Load<Texture2D>(@"sprites/vicksyInsaneOG"));
             Assets.Textures.Add("rectangle", Content.Load<Texture2D>(@"sprites/rect"));
             Assets.Textures.Add("grassBG", Content.Load<Texture2D>(@"sprites/grassBG"));
-            Assets.Textures.Add("vicksyGa", Content.Load<Texture2D>(@"sprites/vicksyGa"));
-            Assets.Textures.Add("vickSUS", Content.Load<Texture2D>(@"sprites/vickSUS"));
-            Assets.Fonts.Add("arial", Content.Load<SpriteFont>("Arial"));
+            Assets.Textures.Add("ExpOrb", Content.Load<Texture2D>(@"sprites/ExpOrb"));
+            Assets.Textures.Add("HealthPack", Content.Load<Texture2D>(@"sprites/HealthPack"));
+            Assets.Textures.Add("Frame", Content.Load<Texture2D>(@"sprites/frame"));
+            Assets.Textures.Add("Bullet", Content.Load<Texture2D>(@"sprites/Bullet"));
+            Assets.Textures.Add("PlayerGnome", Content.Load<Texture2D>(@"sprites/PlayerGnome"));
+            Assets.Textures.Add("EnemyFlower", Content.Load<Texture2D>(@"sprites/EnemyFlower"));
+            Assets.Textures.Add("EnemySlime", Content.Load<Texture2D>(@"sprites/EnemySlime"));
+            Assets.Textures.Add("EnemyShroom", Content.Load<Texture2D>(@"sprites/EnemyShroom"));
+            Assets.Fonts.Add("arial", Content.Load<SpriteFont>(@"fonts/Arial12"));
+            Assets.Fonts.Add("arialBig", Content.Load<SpriteFont>(@"fonts/Arial48"));
 
             //bullet = new Texture2D(GraphicsDevice, 1, 1);
             //bullet.SetData(new[] { Color.White });
@@ -74,29 +76,25 @@ namespace MG2
         {
             w = GraphicsDevice.Viewport.Bounds.Width;
             h = GraphicsDevice.Viewport.Bounds.Height;
+
+            resolutionPublisher.UpdateResolution(w, h);
+
             //inputs
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             if (Keyboard.GetState().IsKeyDown(Keys.P))
             {
-                pause = !pause;
+                paused = !paused;
+            }
+            if (Keyboard.GetState().IsKeyDown (Keys.O))
+            {
+                debugModeOn = !debugModeOn;
             }
 
-            if (!pause)
+            if (!paused && player.IsAlive)
             {
-            player.Update(deltaTime);
-            camera.Update(w, h);
-
-            spawner.Spawn();
-            spawner2.Spawn();
-            spawner3.Spawn();
-            enemyManager.Update(deltaTime);
-            
-            Collider.Collide(enemyManager, player.GetProjectileManager());
-            Collider.Collide(enemyManager, player);
+                level.Update(gameTime);
             }
             
             UpdateFPS(gameTime);
@@ -105,17 +103,25 @@ namespace MG2
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.Immediate);
+            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
-            _background.Draw(betterRenderer);
-            player.Draw(betterRenderer);
-            enemyManager.Draw(betterRenderer);
+            level.Draw(betterRenderer);
+
+            if (!player.IsAlive)
+            {
+                betterRenderer.DrawFontInMiddle(Assets.Fonts["arialBig"], "YOU DIED!", 700, Color.Red);
+            }
 
             //debug stuff
-            _spriteBatch.DrawString(Assets.Fonts["arial"], $"{player.X} {player.Y}", new Vector2(0, 40), Color.Black);
-            DrawFPS();
-            _spriteBatch.DrawString(Assets.Fonts["arial"], $"{player.Hp}", new Vector2(0, 20), Color.White);
-            _spriteBatch.DrawString(Assets.Fonts["arial"], $"{w}, {h}", new Vector2(0, 60), Color.Black);
+            if (debugModeOn)
+            {
+                level.DrawDebug(betterRenderer);
+                _spriteBatch.DrawString(Assets.Fonts["arial"], $"{player.X} {player.Y}", new Vector2(0, 40), Color.Black);
+                DrawFPS();
+                _spriteBatch.DrawString(Assets.Fonts["arial"], $"{player.hp.Value}", new Vector2(0, 20), Color.White);
+                _spriteBatch.DrawString(Assets.Fonts["arial"], $"{w}, {h}", new Vector2(0, 60), Color.Black);
+            }
 
             _spriteBatch.End();
 
@@ -137,7 +143,7 @@ namespace MG2
         private void DrawFPS()
         {
             // Draw FPS in the top-left corner
-            _spriteBatch.DrawString(Content.Load<SpriteFont>("Arial"), $"FPS: {fps}", new Vector2(10, 10), Color.White);
+            _spriteBatch.DrawString(Assets.Fonts["arial"], $"FPS: {fps}", new Vector2(10, 10), Color.White);
         }
     }
 }

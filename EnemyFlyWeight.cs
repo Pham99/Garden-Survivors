@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,15 +12,16 @@ namespace MG2
 {
     public class EnemyFlyWeight
     {
-        public Texture2D texture {  get; private set; }
+        public Texture2D texture {  get; init; }
         private Player target;
-        private HealthBar healthBar;
-        public int maxHp { get; private set; }
+        private Random random = new Random();
+        public int maxHp { get; init; }
         public int attack { get; private set; }
         public int speed { get; private set; }
         public int sizeX { get; private set; }
         public int sizeY { get; private set; }
-        public EnemyFlyWeight(Texture2D texture, Player target, int maxHp, int attack, int speed, int sizeX = 100, int sizeY = 100)
+        public Manager<Collectable> collectable { get; private set; }
+        public EnemyFlyWeight(Texture2D texture, Player target, int maxHp, int attack, int speed, Manager<Collectable> collectable, int sizeX = 100, int sizeY = 100)
         {
             this.texture = texture;
             this.target = target;
@@ -28,7 +30,7 @@ namespace MG2
             this.speed = speed;
             this.sizeX = sizeX;
             this.sizeY = sizeY;
-            healthBar = new HealthBar();
+            this.collectable = collectable;
         }
         public void Update(float deltaTime, Enemy unique)
         {
@@ -40,7 +42,7 @@ namespace MG2
             unique.hitbox.X = (int)unique.X;
             unique.hitbox.Y = (int)unique.Y;
 
-            if (unique.hp <= 0)
+            if (unique.stats.Value <= 0)
             {
                 unique.remove = true;
             }
@@ -49,14 +51,27 @@ namespace MG2
         {
             if (obj is Projectile proj)
             {
-                unique.hp -= proj.Attack;
+                unique.stats.Value -= proj.Attack;
             }
         }
+        public void ToBeRemoved(Enemy unique)
+        {
+            if (unique.remove)
+            {
+                if(random.Next(0, 100) < 10)
+                {
+                    collectable.Add(new HealthPack(unique.hitbox.Center.X, unique.hitbox.Center.Y));
+                }
+                else
+                {
+                    collectable.Add(new ExpOrb(unique.hitbox.Center.X, unique.hitbox.Center.Y));
+                }
+            }
 
+        }
         public void Draw(BetterRender betterRender, Enemy unique)
         {
             betterRender.RenderRelativeToCamera(texture, unique.X, unique.Y, unique.hitbox.Width, unique.hitbox.Height);
-            healthBar.Draw(betterRender, unique.hp, maxHp, unique.X, unique.Y);
         }
     }
 }

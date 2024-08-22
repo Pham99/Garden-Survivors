@@ -11,14 +11,14 @@ namespace MG2
     public class Enemy : GameObject, ICollidable
     {
         private EnemyFlyWeight flyWeight;
-        public int hp;
+        public Stats stats;
         public bool remove = false;
         public Enemy(EnemyFlyWeight flyWeight, int x, int y)
         {
             X = x;
             Y = y;
             this.flyWeight = flyWeight;
-            hp = flyWeight.maxHp;
+            stats = new Stats(flyWeight.maxHp);
             hitbox.Width = flyWeight.sizeX;
             hitbox.Height = flyWeight.sizeY;
         }
@@ -37,7 +37,9 @@ namespace MG2
         }
         public override bool ToBeRemoved()
         {
+            flyWeight.ToBeRemoved(this);
             return remove;
+
         }
         public Rectangle GetHitbox()
         {

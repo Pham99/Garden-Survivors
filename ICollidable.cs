@@ -9,7 +9,7 @@ namespace MG2
 {
     public interface ICollidable
     {
-        public Rectangle GetHitbox();
-        public void OnCollision(ICollidable obj);
+        Rectangle GetHitbox();
+        void OnCollision(ICollidable obj);
     }
 }
